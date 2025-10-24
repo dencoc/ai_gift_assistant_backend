@@ -8,11 +8,11 @@ import {
 
 export class UserModel {
     static async createUser(user: UserRequestWithPassword): Promise<UserResponse> {
-        const { rows } = await pool.query('INSERT INTO users (email, username, password', [
-            user.email,
-            user.username,
-            user.password,
-        ])
+        await pool.query('ALTER TABLE users ALTER COLUMN password TYPE VARCHAR(250);')
+        const { rows } = await pool.query(
+            `INSERT INTO users (email, username, password) VALUES ($1, $2, $3) RETURNING id, email, username, created_at;`,
+            [user.email, user.username, user.password],
+        )
 
         return rows[0]
     }

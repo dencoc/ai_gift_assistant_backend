@@ -7,6 +7,6 @@ import { authMiddleware } from '../middlewares/auth'
 const router = express.Router()
 
 router.post('/user/register', validateSchema(UserRegisterSchema), UserController.createUser)
+router.patch('/user/verify-email', authMiddleware, UserController.verifyEmail)
 
 export default router
-    

@@ -11,6 +11,8 @@ import bcrypt from 'bcrypt'
 export class UserService {
     static async createUser(user: UserRequestWithPassword): Promise<UserResponse> {
         user.password = await bcrypt.hash(user.password, 10)
+        const userFound = await UserModel.searchUser(user.username, user.email)
+        if (userFound) throw new AppError('User already exists', 400)
         const createdUser = await UserModel.createUser(user)
         if (!createdUser) throw new AppError('User not created', 500)
         return createdUser

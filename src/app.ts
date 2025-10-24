@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser'
 import { errorHandler } from './middlewares/errorHandler'
 import UserRouter from './routes/userRoutes'
 
+import './jobs/userDeleteScheduler'
+
 const app = express()
 const port = 3000
 

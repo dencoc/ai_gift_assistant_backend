@@ -24,6 +24,7 @@ export interface UserResponse {
     gender?: string
     description?: string
     telegram_link?: string
+    created_at?: Date
 }
 
 export interface UserResponseWithPassword extends UserResponse {

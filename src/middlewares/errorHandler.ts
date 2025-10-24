@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from 'express'
 import { AppError } from '../utils/AppError'
+import { sendResponse } from '../utils/SendResponse'
 
 export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
     if (err instanceof AppError) {
-        return res.status(err.statusCode).json({ message: err.message })
+        return sendResponse(res, null, err.message, false, err.statusCode)
     }
 
     console.error('Unhandled error:', err)

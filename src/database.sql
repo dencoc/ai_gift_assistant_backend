@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(50) NOT NULL,
     name VARCHAR(50),
     surname VARCHAR(50),
-    username VARCHAR(50),
+    username VARCHAR(50) UNIQUE NOT NULL,
     birthdate DATE,
     gender VARCHAR(10),
     description TEXT,

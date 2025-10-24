@@ -3,25 +3,25 @@ import { redisClient } from '../lib/redisClient'
 import { AppError } from './AppError'
 import { TokenPair } from '../types/token'
 
-export function createAccessToken(id: number): string {
-    const accessToken = jwt.sign({ id }, process.env.JWT_ACCESS_SECRET!, {
+export function createAccessToken(email: string): string {
+    const accessToken = jwt.sign({ email }, process.env.JWT_ACCESS_SECRET!, {
         expiresIn: '15m',
     })
 
     return accessToken
 }
 
-export function createRefreshToken(id: number): string {
-    const refreshToken = jwt.sign({ id }, process.env.JWT_REFRESH_SECRET!, {
+export function createRefreshToken(email: string): string {
+    const refreshToken = jwt.sign({ email }, process.env.JWT_REFRESH_SECRET!, {
         expiresIn: '7d',
     })
 
     return refreshToken
 }
 
-export function createTokenPair(id: number): TokenPair {
-    const accessToken = createAccessToken(id)
-    const refreshToken = createRefreshToken(id)
+export function createTokenPair(email: string): TokenPair {
+    const accessToken = createAccessToken(email)
+    const refreshToken = createRefreshToken(email)
 
     return { accessToken, refreshToken }
 }
