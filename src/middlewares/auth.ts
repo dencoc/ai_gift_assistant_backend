@@ -15,7 +15,13 @@ export const authMiddleware = (req: RequestWithUser, res: Response, next: NextFu
     try {
         const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET as string) as JWTPayload
 
-        req.user = { email: decoded.email }
+        if (decoded.email) {
+            req.user = { email: decoded.email }
+        } else if (decoded.id) {
+            req.user = { id: decoded.id }
+        } else {
+            return sendResponse(res, null, 'Invalid token payload', false, 401)
+        }
         next()
     } catch (error) {
         console.log(error)

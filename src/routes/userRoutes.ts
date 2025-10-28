@@ -6,7 +6,14 @@ import { authMiddleware } from '../middlewares/auth'
 
 const router = express.Router()
 
+router.get('/user/me', authMiddleware, UserController.getMe)
+router.get('/user/:id', authMiddleware, UserController.getUserById)
+router.get('/user/search', authMiddleware, UserController.searchUser)
+router.post('/user/login', validateSchema(UserLoginSchema), UserController.loginUser)
+router.post('/user/logout', authMiddleware, UserController.logout)
 router.post('/user/register', validateSchema(UserRegisterSchema), UserController.createUser)
+router.put('/user', authMiddleware, validateSchema(UserUpdateSchema), UserController.updateUser)
 router.patch('/user/verify-email', authMiddleware, UserController.verifyEmail)
+router.delete('/user', authMiddleware, UserController.deleteUser)
 
 export default router

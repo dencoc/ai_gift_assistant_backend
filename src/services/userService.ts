@@ -18,6 +18,21 @@ export class UserService {
         return createdUser
     }
 
+    static async loginUser(user: UserRequestWithPassword): Promise<UserResponseWithPassword> {
+        const userFound = await UserModel.searchUser(user.username, user.email)
+        if (!userFound) throw new AppError('User not found', 404)
+
+        const userWithPassword = user.username
+            ? await UserModel.getUserByUsernameWithPassword(user.username)
+            : await UserModel.getUserByEmailWithPassword(user.email)
+        if (!userWithPassword) throw new AppError('User not found', 404)
+
+        const passwordMatch = await bcrypt.compare(user.password, userWithPassword.password)
+        if (!passwordMatch) throw new AppError('Invalid password', 401)
+
+        return userWithPassword
+    }
+
     static async getUserById(id: number): Promise<UserResponse | null> {
         if (!id) throw new AppError('User id is required', 400)
         const user = await UserModel.getUserById(id)
@@ -55,10 +70,10 @@ export class UserService {
         return user
     }
 
-    static async searchUser(username: string, email: string): Promise<UserResponse | null> {
+    static async searchUser(username: string, email: string): Promise<UserResponse[] | null> {
         if (!username && !email) throw new AppError('User username or email is required', 400)
-        const user = await UserModel.searchUser(username, email)
-        return user
+        const users = await UserModel.searchUser(username, email)
+        return users
     }
 
     static async updateUser(user: UserRequest): Promise<UserResponse> {
@@ -71,13 +86,6 @@ export class UserService {
     static async verifyEmail(id: number): Promise<boolean> {
         if (!id) throw new AppError('User id is required', 400)
         const status = await UserModel.verifyEmail(id)
-        if (!status) throw new AppError('User not updated', 500)
-        return status
-    }
-
-    static async verifyTelegramLink(id: number): Promise<boolean> {
-        if (!id) throw new AppError('User id is required', 400)
-        const status = await UserModel.verifyTelegramLink(id)
         if (!status) throw new AppError('User not updated', 500)
         return status
     }

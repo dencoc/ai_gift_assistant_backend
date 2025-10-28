@@ -8,6 +8,7 @@ export interface UserRequest {
     gender?: string
     description?: string
     telegram_link?: string
+    telegram_link_confirmed?: boolean
 }
 
 export interface UserRequestWithPassword extends UserRequest {
@@ -24,6 +25,7 @@ export interface UserResponse {
     gender?: string
     description?: string
     telegram_link?: string
+    telegram_link_confirmed?: boolean
     created_at?: Date
 }
 

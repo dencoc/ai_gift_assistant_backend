@@ -19,9 +19,14 @@ export function createRefreshToken(email: string): string {
     return refreshToken
 }
 
-export function createTokenPair(email: string): TokenPair {
-    const accessToken = createAccessToken(email)
-    const refreshToken = createRefreshToken(email)
+export function createTokenPair(id: number): TokenPair {
+    const accessToken = jwt.sign({ id }, process.env.JWT_ACCESS_SECRET!, {
+        expiresIn: '15m',
+    })
+
+    const refreshToken = jwt.sign({ id }, process.env.JWT_REFRESH_SECRET!, {
+        expiresIn: '7d',
+    })
 
     return { accessToken, refreshToken }
 }

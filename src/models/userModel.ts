@@ -27,6 +27,13 @@ export class UserModel {
         return rows[0] || null
     }
 
+    static async getUserByEmailWithPassword(
+        email: string,
+    ): Promise<UserResponseWithPassword | null> {
+        const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email])
+        return rows[0] || null
+    }
+
     static async getUserByIdWithPassword(id: number): Promise<UserResponseWithPassword | null> {
         const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [id])
         return rows[0] || null
@@ -44,22 +51,50 @@ export class UserModel {
         return rows[0] || null
     }
 
-    static async searchUser(username: string, email: string): Promise<UserResponse | null> {
-        const { rows } = await pool.query('SELECT * FROM users WHERE username = $1 OR email = $2', [
-            username,
-            email,
-        ])
+    static async getUserByTelegramLink(telegramLink: string): Promise<UserResponse | null> {
+        const { rows } = await pool.query(
+            "SELECT email, telegram_chat_id, telegram_link_confirmed FROM users WHERE REPLACE(telegram_link, 'https://t.me/', '') = $1",
+            [telegramLink],
+        )
+
         return rows[0] || null
     }
 
+    static async searchUser(username: string, email: string): Promise<UserResponse[] | null> {
+        let query = 'SELECT * FROM users WHERE'
+        const params: string[] = []
+        const values: any[] = []
+
+        if (username) {
+            params.push(`username ILIKE $${params.length + 1}`)
+            values.push(`%${username}%`)
+        }
+
+        if (email) {
+            params.push(`email ILIKE $${params.length + 1}`)
+            values.push(`%${email}%`)
+        }
+
+        if (params.length === 0) {
+            return null
+        }
+
+        query += ' ' + params.join(' OR ')
+
+        const { rows } = await pool.query(query, values)
+
+        return rows.length ? rows : null
+    }
+
     static async updateUser(user: UserRequest): Promise<UserResponse> {
+        console.log(user)
         const { rows } = await pool.query(
-            'UPDATE users SET email = $1, username = $2, password = $3, birthdate = $4, gender = $5, description = $6, telegram_link = $7, name = $8, surname = $9 WHERE id = $4 RETURNING *',
+            'UPDATE users SET email = $1, username = $2, birthdate = $3, gender = $5, description = $6, telegram_link = $7, name = $8, surname = $9, telegram_init_id = $7 WHERE id = $4 RETURNING *',
             [
-                user.id,
                 user.email,
                 user.username,
                 user.birthdate,
+                user.id,
                 user.gender,
                 user.description,
                 user.telegram_link,
@@ -75,8 +110,15 @@ export class UserModel {
         return true
     }
 
-    static async verifyTelegramLink(id: number): Promise<boolean> {
-        await pool.query('UPDATE users SET telegram_link_confirmed = true WHERE id = $1', [id])
+    static async verifyTelegramLink(
+        id: number,
+        telegramLink: string,
+        telegramChatId: number,
+    ): Promise<boolean> {
+        await pool.query(
+            'UPDATE users SET telegram_link_confirmed = true, telegram_chat_id = $2 WHERE id = $1 AND telegram_link = $3',
+            [id, telegramChatId, telegramLink],
+        )
         return true
     }
 
