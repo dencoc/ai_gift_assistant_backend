@@ -3,9 +3,11 @@ import { UserController } from '../controllers/userController'
 import { validateSchema } from '../middlewares/validateSchema'
 import { UserLoginSchema, UserRegisterSchema, UserUpdateSchema } from '../schemas/userSchema'
 import { authMiddleware } from '../middlewares/auth'
+import { TokenController } from '../controllers/tokenController'
 
 const router = express.Router()
 
+router.get('/token/refresh', TokenController.updateRefreshToken)
 router.get('/user/me', authMiddleware, UserController.getMe)
 router.get('/user/:id', authMiddleware, UserController.getUserById)
 router.get('/user/search', authMiddleware, UserController.searchUser)
