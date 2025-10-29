@@ -28,7 +28,7 @@ export class UserService {
         if (!userWithPassword) throw new AppError('User not found', 404)
 
         const passwordMatch = await bcrypt.compare(user.password, userWithPassword.password)
-        if (!passwordMatch) throw new AppError('Invalid password', 401)
+        if (!passwordMatch) throw new AppError('Invalid password', 400)
 
         return userWithPassword
     }
@@ -79,6 +79,15 @@ export class UserService {
     static async updateUser(user: UserRequest): Promise<UserResponse> {
         if (!user.id) throw new AppError('User id is required', 400)
         const updatedUser = await UserModel.updateUser(user)
+        if (!updatedUser) throw new AppError('User not updated', 500)
+        return updatedUser
+    }
+
+    static async updateUserPassword(email: string, password: string): Promise<UserResponse> {
+        if (!email) throw new AppError('email is required', 400)
+        if (!password) throw new AppError('User password is required', 400)
+        password = await bcrypt.hash(password, 10)
+        const updatedUser = await UserModel.updateUserPassword(email, password)
         if (!updatedUser) throw new AppError('User not updated', 500)
         return updatedUser
     }

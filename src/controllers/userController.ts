@@ -7,15 +7,16 @@ import {
     saveRefreshToken,
     deleteRefreshToken,
 } from '../utils/tokens'
-import { sendVerificationEmail } from '../utils/emailUtils'
+import { sendVerificationEmail, sendResetPasswordEmail } from '../utils/emailUtils'
 import { RequestWithUser } from '../types/request'
 import { TelegramService } from '../services/telegramService'
+import { sanitizeUser } from '../utils/sanitizeUser'
 
 export class UserController {
     static async getMe(req: RequestWithUser, res: Response, next: NextFunction) {
         try {
             const user = await UserService.getUserById(req.user?.id as number)
-            return sendResponse(res, user, 'User found successfully', true, 200)
+            return sendResponse(res, sanitizeUser(user), 'User found successfully', true, 200)
         } catch (error) {
             next(error)
         }
@@ -25,7 +26,18 @@ export class UserController {
         try {
             const id = req.params.id
             const user = await UserService.getUserById(Number(id))
-            return sendResponse(res, user, 'User found successfully', true, 200)
+            return sendResponse(res, sanitizeUser(user), 'User found successfully', true, 200)
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    static async sendResetEmail(req: Request, res: Response, next: NextFunction) {
+        try {
+            const email = req.body.email
+            const emailToken = createAccessToken(email)
+            await sendResetPasswordEmail(email, emailToken)
+            return sendResponse(res, null, 'Email sent successfully', true, 200)
         } catch (error) {
             next(error)
         }
@@ -37,7 +49,7 @@ export class UserController {
             const emailToken = createAccessToken(req.body.email)
             await sendVerificationEmail(req.body.email, emailToken)
             const user = await UserService.createUser(req.body)
-            return sendResponse(res, user, 'User created successfully', true, 201)
+            return sendResponse(res, sanitizeUser(user), 'User created successfully', true, 201)
         } catch (error) {
             next(error)
         }
@@ -46,13 +58,26 @@ export class UserController {
     static async verifyEmail(req: RequestWithUser, res: Response, next: NextFunction) {
         try {
             const email = req.user?.email as string
-
             const user = await UserService.getUserByEmail(email)
             if (!user) throw new Error('User not found')
 
             const isVerified = await UserService.verifyEmail(user.id)
 
-            return sendResponse(res, isVerified, 'Email verified successfully', true, 200)
+            const tokens = createTokenPair(user.id)
+            await saveRefreshToken(user.id, tokens.refreshToken)
+            res.cookie('refreshToken', tokens.refreshToken, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none',
+            })
+
+            return sendResponse(
+                res,
+                { isVerified, accessToken: tokens.accessToken },
+                'Email verified successfully',
+                true,
+                200,
+            )
         } catch (error) {
             next(error)
         }
@@ -65,7 +90,7 @@ export class UserController {
 
             const user = await UserService.searchUser(username, email)
 
-            return sendResponse(res, user, 'User found successfully', true, 200)
+            return sendResponse(res, sanitizeUser(user), 'User found successfully', true, 200)
         } catch (error) {
             next(error)
         }
@@ -77,6 +102,7 @@ export class UserController {
 
             const { accessToken, refreshToken } = createTokenPair(user.id)
 
+            console.log(`user_id:${user.id} - ${refreshToken}`)
             await saveRefreshToken(user.id, refreshToken)
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
@@ -84,7 +110,7 @@ export class UserController {
                 sameSite: 'none',
             })
 
-            const userWithToken = { ...user, accessToken }
+            const userWithToken = { ...sanitizeUser(user), accessToken }
             return sendResponse(res, userWithToken, 'User logged in successfully', true, 200)
         } catch (error) {
             next(error)
@@ -116,11 +142,20 @@ export class UserController {
 
             return sendResponse(
                 res,
-                { user, deepLink },
+                { user: sanitizeUser(user), deepLink },
                 'User updated successfully. Please follow the Telegram link to confirm.',
                 true,
                 200,
             )
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    static async updatePassword(req: RequestWithUser, res: Response, next: NextFunction) {
+        try {
+            await UserService.updateUserPassword(req.user?.email as string, req.body.password)
+            return sendResponse(res, null, 'Password updated successfully', true, 200)
         } catch (error) {
             next(error)
         }

@@ -9,6 +9,8 @@ export interface UserRequest {
     description?: string
     telegram_link?: string
     telegram_link_confirmed?: boolean
+    telegram_username?: string
+    telegram_init_id?: string
 }
 
 export interface UserRequestWithPassword extends UserRequest {
@@ -26,6 +28,8 @@ export interface UserResponse {
     description?: string
     telegram_link?: string
     telegram_link_confirmed?: boolean
+    telegram_username?: string
+    telegram_init_id?: string
     created_at?: Date
 }
 

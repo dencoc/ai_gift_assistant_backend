@@ -41,11 +41,18 @@ export async function saveRefreshToken(id: number, refreshToken: string): Promis
 
 export async function verifyRefreshToken(refreshToken: string, id: number): Promise<void> {
     try {
+        console.log(refreshToken)
+        console.log(id)
+
         const storedToken = await redisClient.get(`user_id:${id}`)
+        console.log('aboba')
+        console.log(storedToken)
 
         if (storedToken && storedToken === refreshToken) {
+            console.log('Refresh token verified')
             return
         } else {
+            console.log('Invalid refresh token')
             throw new AppError('Invalid refresh token', 401)
         }
     } catch (error) {

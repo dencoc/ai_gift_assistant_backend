@@ -105,6 +105,14 @@ export class UserModel {
         return rows[0]
     }
 
+    static async updateUserPassword(email: string, password: string): Promise<UserResponse> {
+        const { rows } = await pool.query(
+            'UPDATE users SET password = $2 WHERE email = $1 RETURNING *',
+            [email, password],
+        )
+        return rows[0]
+    }
+
     static async verifyEmail(id: number): Promise<boolean> {
         await pool.query('UPDATE users SET email_confirmed = true WHERE id = $1', [id])
         return true

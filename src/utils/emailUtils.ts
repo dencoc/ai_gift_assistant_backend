@@ -66,24 +66,24 @@ export async function sendResetPasswordEmail(email: string, token: string) {
     const verificationLink = `${process.env.EMAIL_RESET_PASSWORD_URL}?token=${token}`
 
     const mailOptions = {
-        from: `"CryptoSense" <${process.env.MAIL_ADDRESS}>`,
+        from: `"Gift Assistant" <${process.env.MAIL_ADDRESS}>`,
         to: email,
         subject: 'Восстановление пароля',
         text: `Здравствуйте!  
     
-    Вы запросили восстановление пароля в CryptoSense. Чтобы создать новый пароль, перейдите по следующей ссылке:  
+    Вы запросили восстановление пароля в Gift Assistant. Чтобы создать новый пароль, перейдите по следующей ссылке:  
     
     ${verificationLink}  
     
     Если вы не запрашивали восстановление пароля, просто проигнорируйте это письмо.  
     
     С уважением,  
-    Команда CryptoSense`,
+    Команда LoSoci`,
         html: `<p>Здравствуйте!</p>
-                <p>Вы запросили <b>восстановление пароля</b> в <b>CryptoSense</b>. Чтобы создать новый пароль, нажмите на кнопку ниже:</p>
+                <p>Вы запросили <b>восстановление пароля</b> в <b>Gift Assistant</b>. Чтобы создать новый пароль, нажмите на кнопку ниже:</p>
                 <p><a href="${verificationLink}" style="display: inline-block; padding: 10px 20px; font-size: 16px; color: #fff; background-color: #007bff; text-decoration: none; border-radius: 5px;">Сбросить пароль</a></p>
                 <p>Если вы не запрашивали восстановление пароля, просто проигнорируйте это письмо.</p>
-                <p>С уважением,<br>Команда CryptoSense</p>`,
+                <p>С уважением,<br>Команда LoSoci</p>`,
     }
 
     try {

@@ -21,12 +21,17 @@ export const UserLoginSchema = z
     })
 
 export const UserUpdateSchema = z.object({
-    email: z.string().email({ message: 'Invalid email format' }).optional(),
+    email: z.string().email({ message: 'Invalid email format' }).nullable().optional(),
 
-    username: z.string().min(6, { message: 'Username must be at least 6 characters' }).optional(),
+    username: z
+        .string()
+        .min(6, { message: 'Username must be at least 6 characters' })
+        .nullable()
+        .optional(),
 
     name: z
         .string()
+        .nullable()
         .optional()
         .refine((val) => !val || /^[A-ZА-Я][a-zа-я]+$/.test(val), {
             message: 'Name must start with a capital letter and contain only letters',
@@ -34,6 +39,7 @@ export const UserUpdateSchema = z.object({
 
     surname: z
         .string()
+        .nullable()
         .optional()
         .refine((val) => !val || /^[A-ZА-Я][a-zа-я]+$/.test(val), {
             message: 'Surname must start with a capital letter and contain only letters',
@@ -41,22 +47,19 @@ export const UserUpdateSchema = z.object({
 
     birthdate: z
         .string()
+        .nullable()
         .optional()
         .refine((val) => !val || !isNaN(Date.parse(val)), {
             message: 'Birthdate must be a valid date (YYYY-MM-DD)',
         }),
 
-    gender: z
-        .enum(['мужской', 'женский'])
-        .optional()
-        .refine((val) => !val || ['мужской', 'женский'].includes(val), {
-            message: "Gender must be 'мужской' or 'женский'",
-        }),
+    gender: z.enum(['мужской', 'женский']).nullable().optional(),
 
-    description: z.string().optional(),
+    description: z.string().nullable().optional(),
 
     telegram_link: z
         .string()
+        .nullable()
         .optional()
         .refine((val) => !val || val.startsWith('@'), {
             message: 'Telegram link must start with @',
