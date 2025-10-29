@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS users (
     email_confirmed BOOLEAN DEFAULT false,
     telegram_link_confirmed BOOLEAN DEFAULT false,
     telegram_chat_id BIGINT,
+    telegram_username VARCHAR(100),
+    telegram_init_id VARCHAR(50),
     created_at TIMESTAMP DEFAULT NOW()
 );
 
