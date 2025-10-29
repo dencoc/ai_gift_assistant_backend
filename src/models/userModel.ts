@@ -5,6 +5,7 @@ import {
     UserResponseWithPassword,
     UserRequestWithPassword,
 } from '../types/user'
+import bcrypt from 'bcrypt'
 
 export class UserModel {
     static async createUser(user: UserRequestWithPassword): Promise<UserResponse> {
@@ -133,5 +134,33 @@ export class UserModel {
     static async deleteUser(id: number): Promise<boolean> {
         await pool.query('DELETE FROM users WHERE id = $1', [id])
         return true
+    }
+
+    static async updatePasswordByTelegramChatId(
+        chatId: number,
+        newPassword: string,
+    ): Promise<void> {
+        const hashedPassword = await bcrypt.hash(newPassword, 10)
+        try {
+            await pool.query('UPDATE users SET password = $1 WHERE telegram_chat_id = $2', [
+                hashedPassword,
+                chatId,
+            ])
+        } catch (error) {
+            console.error('Error updating password:', error)
+            throw error
+        }
+    }
+
+    static async getUserByTelegramChatId(chatId: number) {
+        try {
+            const { rows } = await pool.query('SELECT * FROM users WHERE telegram_chat_id = $1', [
+                chatId,
+            ])
+            return rows[0] || null
+        } catch (error) {
+            console.error('Error fetching user by chatId:', error)
+            throw error
+        }
     }
 }
