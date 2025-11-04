@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS chats (
     id SERIAL PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
     sender_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    recipient_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    recipient_id INT REFERENCES users(id) ON DELETE CASCADE,
     context VARCHAR(250)
 );
 
