@@ -3,6 +3,8 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import { errorHandler } from './middlewares/errorHandler'
 import UserRouter from './routes/userRoutes'
+import ChatRouter from './routes/chatRoutes'
+import messageRoutes from './routes/messageRoutes'
 import { initTelegramBot } from './telegram/bot'
 
 import './jobs/userScheduler'
@@ -10,14 +12,18 @@ import './jobs/userScheduler'
 const app = express()
 const port = 3000
 
-app.use(cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-}))
+app.use(
+    cors({
+        origin: process.env.CLIENT_URL,
+        credentials: true,
+    }),
+)
 app.use(express.json())
 app.use(cookieParser())
 
 app.use('/api', UserRouter)
+app.use('/api', ChatRouter)
+app.use('/api', messageRoutes)
 
 app.get('/server', (req, res) => res.send('Server is running!'))
 
