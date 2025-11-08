@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
-import { createTokenPair, verifyRefreshToken, saveRefreshToken } from '../utils/tokens'
+import { createTokenPair, verifyRefreshToken, saveRefreshToken } from '../utils/tokenUtils'
 import { sendResponse } from '../utils/SendResponse'
 import { JWTPayload } from '../types/token'
 

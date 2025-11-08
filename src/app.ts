@@ -5,7 +5,9 @@ import { errorHandler } from './middlewares/errorHandler'
 import UserRouter from './routes/userRoutes'
 import ChatRouter from './routes/chatRoutes'
 import messageRoutes from './routes/messageRoutes'
+import photoRoutes from './routes/photoRoutes'
 import { initTelegramBot } from './telegram/bot'
+import path from 'path'
 
 import './jobs/userScheduler'
 
@@ -24,6 +26,8 @@ app.use(cookieParser())
 app.use('/api', UserRouter)
 app.use('/api', ChatRouter)
 app.use('/api', messageRoutes)
+app.use('/api', photoRoutes)
+app.use('/api/avatar/url', express.static(path.join(__dirname, '../uploads/avatars')))
 
 app.get('/server', (req, res) => res.send('Server is running!'))
 
