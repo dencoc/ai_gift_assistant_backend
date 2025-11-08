@@ -30,7 +30,7 @@ jobs:
 
       # 5 Проверяем ESLint
       - name: Run ESLint
-        run: npx eslint "**/*.{ts,js}" --max-warnings=0
+        run: npm run lint
 
       # 6 Собираем TypeScript
       - name: Build TypeScript
