@@ -1,0 +1,37 @@
+name: Backend CI
+
+on:  push
+
+
+jobs:
+  build-and-lint:
+    name: Build, Lint & Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1 Клонируем репозиторий
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2 Ставим Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # можно изменить под твой проект
+          cache: 'npm'
+
+      # 3 Устанавливаем зависимости
+      - name: Install dependencies
+        run: npm ci
+
+      # 4 Проверяем форматирование Prettier
+      - name: Check Prettier formatting
+        run: npx prettier --check "src/**/*.{ts,js,json,md,yml,yaml}"
+
+      # 5 Проверяем ESLint
+      - name: Run ESLint
+        run: npx eslint "**/*.{ts,js}" --max-warnings=0
+
+      # 6 Собираем TypeScript
+      - name: Build TypeScript
+        run: npm run build
