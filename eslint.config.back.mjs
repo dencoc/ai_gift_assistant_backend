@@ -18,6 +18,12 @@ export default defineConfig([
         },
 
         extends: [js.configs.recommended, ...tseslint.configs.recommended],
+        rules: {
+            '@typescript-eslint/no-explicit-any': 'warn',
+            '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+            'no-useless-catch': 'off',
+        }
+
     },
 
     pluginPrettier,
