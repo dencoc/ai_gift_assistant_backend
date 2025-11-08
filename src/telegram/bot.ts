@@ -100,8 +100,7 @@ export function initTelegramBot() {
                     { chat_id: chatId, message_id: messageId },
                 )
             } catch (error: any) {
-                if (error.response?.body?.description?.includes('message is not modified')) {
-                } else {
+                if (!error.response?.body?.description?.includes('message is not modified')) {
                     console.error('Error removing keyboard:', error)
                 }
             }
