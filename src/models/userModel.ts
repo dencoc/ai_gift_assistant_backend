@@ -19,7 +19,17 @@ export class UserModel {
     }
 
     static async getUserById(id: number): Promise<UserResponse | null> {
-        const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [id])
+        const { rows } = await pool.query(
+            `SELECT u.*, p.name AS avatar_filename,
+            CASE WHEN p.name IS NOT NULL 
+                 THEN $2 || '/api/avatar/url/' || p.name 
+                 ELSE NULL 
+            END AS avatar
+     FROM users u
+     LEFT JOIN photo p ON u.id = p.user_id
+     WHERE u.id = $1`,
+            [id, process.env.SERVER_URL],
+        )
         return rows[0] || null
     }
 
@@ -62,7 +72,7 @@ export class UserModel {
     }
 
     static async searchUser(username: string, email: string): Promise<UserResponse[] | null> {
-        let query = 'SELECT * FROM users WHERE'
+        let query = 'SELECT * FROM users left join photo on users.id = photo.user_id WHERE'
         const params: string[] = []
         const values: any[] = []
 
@@ -88,7 +98,6 @@ export class UserModel {
     }
 
     static async updateUser(user: UserRequest): Promise<UserResponse> {
-        console.log(user)
         const { rows } = await pool.query(
             'UPDATE users SET email = $1, username = $2, birthdate = $3, gender = $5, description = $6, telegram_link = $7, name = $8, surname = $9, telegram_init_id = $7 WHERE id = $4 RETURNING *',
             [

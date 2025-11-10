@@ -13,6 +13,7 @@ export const sanitizeUser = (user: any): UserResponse => ({
     telegram_link_confirmed: user.telegram_link_confirmed,
     telegram_init_id: user.telegram_init_id,
     telegram_username: user.telegram_username,
+    avatar: user.avatar,
     created_at: user.created_at,
 })
 
