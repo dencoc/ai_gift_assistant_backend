@@ -1,3 +1,5 @@
+import { extend } from 'zod/mini'
+
 export interface EventRequest {
     id?: number
     title: string

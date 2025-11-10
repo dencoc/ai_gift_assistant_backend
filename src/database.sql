@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS events (
     description TEXT,
     date DATE NOT NULL,
     importance_id INT REFERENCES importance(id) ON DELETE SET NULL,
-    recipient_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    recipient_id INT REFERENCES users(id) ON DELETE CASCADE,
     completed BOOLEAN DEFAULT false,
     user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE
 );
