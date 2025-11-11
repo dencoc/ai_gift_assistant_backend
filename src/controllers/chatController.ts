@@ -4,9 +4,12 @@ import { sendResponse } from '../utils/SendResponse'
 import { RequestWithUser } from '../types/request'
 
 export class ChatController {
-    static async createChat(req: Request, res: Response, next: NextFunction) {
+    static async createChat(req: RequestWithUser, res: Response, next: NextFunction) {
         try {
-            const chat = await ChatService.createChat(req.body)
+            const chat = await ChatService.createChat({
+                ...req.body,
+                sender_id: req.user?.id as number,
+            })
             return sendResponse(res, chat, 'Chat created successfully', true, 201)
         } catch (error) {
             next(error)

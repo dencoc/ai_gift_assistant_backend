@@ -31,7 +31,7 @@ app.use('/api/avatar/url', express.static(path.join(__dirname, '../uploads/avata
 
 app.get('/server', (req, res) => res.send('Server is running!'))
 
-initTelegramBot()
+//initTelegramBot()
 app.use(errorHandler)
 
 app.listen(port, () => {
