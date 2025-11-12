@@ -34,6 +34,15 @@ export class ChatController {
         }
     }
 
+    static async searchInChats(req: Request, res: Response, next: NextFunction) {
+        try {
+            const chats = await ChatService.searchInChats(req.query.title as string)
+            return sendResponse(res, chats, 'Chats found successfully', true, 200)
+        } catch (error) {
+            next(error)
+        }
+    }
+
     static async updateChat(req: Request, res: Response, next: NextFunction) {
         try {
             const chat = await ChatService.updateChat(req.body)

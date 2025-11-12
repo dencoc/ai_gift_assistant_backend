@@ -6,8 +6,9 @@ import { UserService } from './userService'
 export class EventService {
     static async createEvent(event: EventRequest): Promise<EventResponse> {
         if (!event) throw new AppError('Information is required', 400)
+        console.log(event.user_id)
         await UserService.getUserById(event.user_id)
-        await UserService.getUserById(event.recipient_id as number)
+        if (event.recipient_id) await UserService.getUserById(event.recipient_id as number)
         return await EventModel.create(event)
     }
 
@@ -15,7 +16,7 @@ export class EventService {
         userId: number,
         limit: number,
         offset: number,
-        date: string,
+        date?: string,
     ): Promise<EventResponse[]> {
         if (!userId) throw new AppError('User id is required', 400)
         await UserService.getUserById(userId)
@@ -30,7 +31,7 @@ export class EventService {
     static async updateEvent(event: EventRequest): Promise<EventResponse> {
         if (!event) throw new AppError('Information is required', 400)
         await UserService.getUserById(event.user_id)
-        await UserService.getUserById(event.recipient_id as number)
+        if (event.recipient_id) await UserService.getUserById(event.recipient_id as number)
         return await EventModel.updateEvent(event)
     }
 

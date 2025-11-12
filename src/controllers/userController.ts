@@ -11,6 +11,7 @@ import { sendVerificationEmail, sendResetPasswordEmail } from '../utils/emailUti
 import { RequestWithUser } from '../types/request'
 import { TelegramService } from '../services/telegramService'
 import { sanitizeUser } from '../utils/sanitizeUser'
+import { UserResponse } from '../types/user'
 
 export class UserController {
     static async getMe(req: RequestWithUser, res: Response, next: NextFunction) {
@@ -22,7 +23,24 @@ export class UserController {
         }
     }
 
+    static async searchUser(req: Request, res: Response, next: NextFunction) {
+        try {
+            const username = typeof req.query.username === 'string' ? req.query.username : ''
+            const email = typeof req.query.email === 'string' ? req.query.email : ''
+           
+            const users = await UserService.searchUser(username, email)
+            const result = (users ?? [])
+                .map(sanitizeUser)
+                .filter((u): u is UserResponse => u !== null)
+                
+            return sendResponse(res, result, 'User found successfully', true, 200)
+        } catch (error) {
+            next(error)
+        }
+    }
+
     static async getUserById(req: RequestWithUser, res: Response, next: NextFunction) {
+        console.log(1)
         try {
             const id = req.params.id
             const user = await UserService.getUserById(Number(id))
@@ -78,19 +96,6 @@ export class UserController {
                 true,
                 200,
             )
-        } catch (error) {
-            next(error)
-        }
-    }
-
-    static async searchUser(req: Request, res: Response, next: NextFunction) {
-        try {
-            const username = typeof req.query.username === 'string' ? req.query.username : ''
-            const email = typeof req.query.email === 'string' ? req.query.email : ''
-
-            const user = await UserService.searchUser(username, email)
-
-            return sendResponse(res, sanitizeUser(user), 'User found successfully', true, 200)
         } catch (error) {
             next(error)
         }

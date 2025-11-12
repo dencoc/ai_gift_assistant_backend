@@ -21,25 +21,76 @@ export class EventModel {
         userId: number,
         limit: number,
         offset: number,
-        date: string,
+        date?: string, // опциональный фильтр на конкретную дату
     ): Promise<EventResponse[]> {
-        let query = 'SELECT * FROM events WHERE user_id = $1 LIMIT $2 OFFSET $3'
-        const values: (number | string)[] = [userId, limit, offset]
+        const values: any[] = [userId]
+        let dateFilter = ''
+
         if (date) {
-            query += ' AND date = $4'
+            dateFilter = `WHERE gs.day = DATE($2)`
             values.push(date)
         }
-        const { rows } = await pool.query<EventResponse>(query, values)
 
+        const query = `
+        WITH date_series AS (
+            SELECT generate_series(
+                CURRENT_DATE, 
+                CURRENT_DATE + INTERVAL '365 days', -- или до MAX(e.date), если нужно
+                INTERVAL '1 day'
+            )::date AS day
+        ),
+        paginated_dates AS (
+            SELECT day
+            FROM date_series gs
+            ${dateFilter}
+            ORDER BY day ASC
+            LIMIT $${values.length + 1} OFFSET $${values.length + 2}
+        )
+       SELECT 
+    pd.day AS date,
+    e.id,
+    e.title,
+    e.description,
+    e.importance_id,
+    e.completed,
+    e.user_id,
+    e.recipient_id,
+    u.id AS "userId",
+    u.username AS "userName",
+    u.email AS "userEmail"
+FROM paginated_dates pd
+LEFT JOIN events e
+    ON e.user_id = $1 AND e.date = pd.day
+LEFT JOIN users u
+    ON e.recipient_id = u.id
+ORDER BY pd.day ASC, e.id ASC
+    `
+
+        values.push(limit, offset)
+
+        const { rows } = await pool.query<EventResponse>(query, values)
         return rows
     }
 
     static async getEventById(id: number): Promise<EventResponse | null> {
         const { rows } = await pool.query<EventResponse>(
-            `SELECT * FROM events LEFT JOIN users ON recipient_id = users.id WHERE id = $1`,
+            `
+        SELECT 
+            e.id,
+            e.title,
+            e.description,
+            TO_CHAR(e.date, 'YYYY-MM-DD') AS date,
+            e.importance_id,
+            e.completed,
+            e.recipient_id,
+            e.user_id
+        FROM events e
+        WHERE e.id = $1
+        `,
             [id],
         )
-        return rows[0]
+
+        return rows[0] || null
     }
 
     static async updateEvent(event: EventRequest): Promise<EventResponse> {

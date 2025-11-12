@@ -9,8 +9,9 @@ const router = express.Router()
 
 router.get('/token/refresh', TokenController.updateRefreshToken)
 router.get('/user/me', authMiddleware, UserController.getMe)
+router.get('/user/search', UserController.searchUser)
 router.get('/user/:id', authMiddleware, UserController.getUserById)
-router.get('/user/search', authMiddleware, UserController.searchUser)
+
 router.post('/user/reset-password', UserController.sendResetEmail)
 router.post('/user/login', validateSchema(UserLoginSchema), UserController.loginUser)
 router.post('/user/logout', authMiddleware, UserController.logout)

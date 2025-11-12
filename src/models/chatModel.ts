@@ -4,8 +4,11 @@ import { ChatRequest, ChatResponse } from '../types/chat'
 export class ChatModel {
     static async createChat(chat: ChatRequest): Promise<ChatResponse> {
         const { rows } = await pool.query(
-            'INSERT INTO chats (sender_id, title, context) VALUES ($1, $2, $3) RETURNING *',
-            [chat.sender_id, chat.title, chat.context],
+            `INSERT INTO chats 
+         (sender_id, title, context, recipient_id) 
+         VALUES ($1, $2, $3, $4) 
+         RETURNING *`,
+            [chat.sender_id, chat.title, chat.context, chat.recipient_id || null],
         )
         return rows[0]
     }
@@ -17,6 +20,13 @@ export class ChatModel {
 
     static async getAllChatsByUserId(userId: number): Promise<ChatResponse[]> {
         const { rows } = await pool.query('SELECT * FROM chats WHERE sender_id = $1', [userId])
+        return rows
+    }
+
+    static async searchInChats(title: string): Promise<ChatResponse[]> {
+        const { rows } = await pool.query('SELECT * FROM chats WHERE title ILIKE $1', [
+            `%${title}%`,
+        ])
         return rows
     }
 

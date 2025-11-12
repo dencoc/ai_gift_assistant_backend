@@ -71,30 +71,50 @@ export class UserModel {
         return rows[0] || null
     }
 
-    static async searchUser(username: string, email: string): Promise<UserResponse[] | null> {
-        let query = 'SELECT * FROM users left join photo on users.id = photo.user_id WHERE'
+    static async searchUser(username: string, email: string): Promise<UserResponse[]> {
         const params: string[] = []
         const values: any[] = []
 
+        let paramIndex = 1
+
         if (username) {
-            params.push(`username ILIKE $${params.length + 1}`)
+            params.push(`u.username ILIKE $${paramIndex}`)
             values.push(`%${username}%`)
+            paramIndex++
         }
 
         if (email) {
-            params.push(`email ILIKE $${params.length + 1}`)
+            params.push(`u.email ILIKE $${paramIndex}`)
             values.push(`%${email}%`)
+            paramIndex++
         }
 
         if (params.length === 0) {
-            return null
+            return []
         }
 
-        query += ' ' + params.join(' OR ')
+        // SERVER_URL — всегда последний
+        const serverUrlParam = `$${paramIndex}`
+        values.push(process.env.SERVER_URL)
+
+        const query = `
+        SELECT 
+            u.id, u.email, u.username, u.name, u.surname, u.birthdate, 
+            u.gender, u.description, u.telegram_link, u.telegram_link_confirmed,
+            u.telegram_init_id, u.telegram_username, u.created_at,
+            p.name AS avatar_filename,
+            CASE 
+                WHEN p.name IS NOT NULL 
+                THEN ${serverUrlParam} || '/api/avatar/url/' || p.name 
+                ELSE NULL 
+            END AS avatar
+        FROM users u
+        LEFT JOIN photo p ON u.id = p.user_id
+        WHERE ${params.join(' OR ')}
+    `
 
         const { rows } = await pool.query(query, values)
-
-        return rows.length ? rows : null
+        return rows
     }
 
     static async updateUser(user: UserRequest): Promise<UserResponse> {
