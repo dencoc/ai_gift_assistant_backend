@@ -39,6 +39,12 @@ export class ChatService {
         return chats
     }
 
+    static async searchInChats(title: string): Promise<ChatResponse[]> {
+        if (!title) throw new AppError('Title is required', 400)
+        const chats = await ChatModel.searchInChats(title)
+        return chats
+    }
+
     static async addRecipientToChat(chatId: number, recipientId: number): Promise<ChatResponse> {
         if (!chatId) throw new AppError('Chat id is required', 400)
         if (!recipientId) throw new AppError('Recipient id is required', 400)

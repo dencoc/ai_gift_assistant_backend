@@ -1,3 +1,4 @@
+// services/messageService.ts
 import { MessageModel } from '../models/messageModel'
 import { ChatModel } from '../models/chatModel'
 import { AppError } from '../utils/AppError'
@@ -11,8 +12,8 @@ export class MessageService {
         userMessage: string,
         sender_id: number,
         recipient_id: number,
-        onChunk: (chunk: string) => void,
-    ): Promise<void> {
+    ): Promise<string> {
+        // ← Возвращаем строку, а не вызываем onChunk
         const chat = await ChatModel.getChatById(chatId)
         if (!chat) throw new AppError('Chat not found', 404)
 
@@ -30,51 +31,31 @@ export class MessageService {
             body: JSON.stringify({
                 prompt: userMessage,
                 sender_id: String(sender_id),
-                recipient_id: String(recipient_id),
+                recipient_id: recipient_id ? String(recipient_id) : String(sender_id),
             }),
         })
 
-        console.log(response)
-        console.log('AI Response headers:', Object.fromEntries(response.headers))
-        console.log('Content-Type:', response.headers.get('content-type'))
+        console.log('AI Response:', response)
 
-        if (!response.headers.get('content-type')?.includes('text/plain')) {
-            const text = await response.text()
-            console.warn('Not streaming, got JSON:', text)
-            onChunk(text)
-            return
-        }
-        // services/messageService.ts
         if (!response.ok) {
             let errorText = 'Unknown error'
             try {
                 const errorBody = await response.text()
                 console.error('AI agent error body:', errorBody)
                 errorText = errorBody
-            } catch {
-                // Игнор
-            }
+            } catch {}
             throw new AppError(`AI agent error: ${response.status} — ${errorText}`, 502)
         }
-        if (!response.body) throw new AppError('No response body from AI agent', 500)
 
-        const reader = response.body.getReader()
-        console.log(reader)
-        const decoder = new TextDecoder()
+        const responseBody: any = await response.json()
+        console.log('AI JSON response:', responseBody)
+
         let assistantReply = ''
 
-        try {
-            while (true) {
-                const { done, value } = await reader.read()
-                if (done) break
-
-                const chunk = decoder.decode(value, { stream: true })
-                console.log('asl;jkdlkajs' + chunk)
-                assistantReply += chunk
-                onChunk(chunk)
-            }
-        } finally {
-            reader.releaseLock()
+        if (responseBody && responseBody.answer) {
+            assistantReply = responseBody.answer
+        } else {
+            assistantReply = JSON.stringify(responseBody)
         }
 
         await MessageModel.createMessage({
@@ -82,6 +63,8 @@ export class MessageService {
             chat_id: chatId,
             role: 'assistant',
         })
+
+        return assistantReply // ← Возвращаем полный текст ответа
     }
 
     static async getMessagesByChatId(chatId: number): Promise<MessageResponse[]> {

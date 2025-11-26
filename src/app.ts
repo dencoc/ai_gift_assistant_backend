@@ -6,6 +6,7 @@ import UserRouter from './routes/userRoutes'
 import ChatRouter from './routes/chatRoutes'
 import messageRoutes from './routes/messageRoutes'
 import photoRoutes from './routes/photoRoutes'
+import eventRoutes from './routes/eventRoutes'
 import { initTelegramBot } from './telegram/bot'
 import path from 'path'
 
@@ -27,11 +28,12 @@ app.use('/api', UserRouter)
 app.use('/api', ChatRouter)
 app.use('/api', messageRoutes)
 app.use('/api', photoRoutes)
+app.use('/api', eventRoutes)
 app.use('/api/avatar/url', express.static(path.join(__dirname, '../uploads/avatars')))
 
 app.get('/server', (req, res) => res.send('Server is running!'))
 
-initTelegramBot()
+//initTelegramBot()
 app.use(errorHandler)
 
 app.listen(port, () => {

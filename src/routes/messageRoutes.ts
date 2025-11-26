@@ -8,3 +8,4 @@ router.get('/message/:id', authMiddleware, MessageController.getMessagesByChatId
 router.post('/message/stream', authMiddleware, MessageController.stream)
 
 export default router
+    
