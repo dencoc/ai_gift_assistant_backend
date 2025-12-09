@@ -93,7 +93,6 @@ export class UserModel {
             return []
         }
 
-        // SERVER_URL — всегда последний
         const serverUrlParam = `$${paramIndex}`
         values.push(process.env.SERVER_URL)
 

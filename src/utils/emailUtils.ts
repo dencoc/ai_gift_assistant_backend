@@ -92,3 +92,55 @@ export async function sendResetPasswordEmail(email: string, token: string) {
         throw new AppError('Error sending reset password email', 500)
     }
 }
+
+export async function sendDailyEventReminder(
+    email: string,
+    title: string,
+    eventDate: Date,
+    daysLeft: number,
+): Promise<void> {
+    const transporter: Transporter<SMTPTransport.SentMessageInfo> = nodemailer.createTransport({
+        host: process.env.MAIL_SMTP,
+        port: Number(process.env.MAIL_PORT),
+        secure: process.env.MAIL_SECURE === 'true',
+        auth: {
+            user: process.env.MAIL_ADDRESS,
+            pass: process.env.MAIL_PASSWORD,
+        },
+    } as SMTPTransport.Options)
+    const formattedDate = eventDate.toLocaleDateString('ru-RU', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    })
+
+    let greeting = 'Доброе утро'
+    if (daysLeft === 0) greeting = 'Сегодня!'
+    else if (daysLeft === 1) greeting = 'Завтра!'
+    else if (daysLeft <= 3) greeting = 'Скоро!'
+
+    const subject =
+        daysLeft === 0 ? `Сегодня: ${title}` : `${greeting}: "${title}" через ${daysLeft} дн.`
+
+    const html = `
+            <h2 style="color: #d4380d;">${greeting} — важное событие!</h2>
+            <p>У вас запланировано:</p>
+            <div style="background: #fff2e8; padding: 20px; border-radius: 12px; font-size: 18px; margin: 20px 0; border-left: 6px solid #ffbb96;">
+                <strong>${title}</strong><br>
+                <span style="color: #d4380d; font-weight: bold;">${formattedDate}</span>
+            </div>
+            <p>Не забудьте поздравить или подготовить подарок с помощью <strong>Gift Assistant</strong>!</p>
+            <p>С любовью,<br><strong>Gift Assistant</strong></p>
+        `
+
+    await transporter.sendMail({
+        from: `"Gift Assistant" <${process.env.MAIL_ADDRESS}>`,
+        to: email,
+        subject,
+        html,
+        text: `${greeting}! ${
+            daysLeft === 0 ? 'Сегодня' : 'Через ' + daysLeft + ' дн.'
+        } у вас событие: "${title}" — ${formattedDate}`,
+    })
+}

@@ -29,7 +29,7 @@ export class MessageService {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                prompt: userMessage,
+                message: userMessage,
                 sender_id: String(sender_id),
                 recipient_id: recipient_id ? String(recipient_id) : String(sender_id),
             }),
@@ -53,9 +53,9 @@ export class MessageService {
         let assistantReply = ''
 
         if (responseBody && responseBody.answer) {
-            assistantReply = responseBody.answer
+            assistantReply = responseBody.answer.response
         } else {
-            assistantReply = JSON.stringify(responseBody)
+            assistantReply = JSON.stringify(responseBody.response)
         }
 
         await MessageModel.createMessage({
@@ -64,7 +64,7 @@ export class MessageService {
             role: 'assistant',
         })
 
-        return assistantReply // ← Возвращаем полный текст ответа
+        return assistantReply
     }
 
     static async getMessagesByChatId(chatId: number): Promise<MessageResponse[]> {

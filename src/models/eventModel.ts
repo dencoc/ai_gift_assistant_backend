@@ -1,6 +1,13 @@
 import pool from '../lib/db'
 import { EventRequest, EventResponse } from '../types/event'
 
+interface EventWithEmail {
+    id: number
+    title: string
+    date: string
+    email: string
+}
+
 export class EventModel {
     static async create(event: EventRequest): Promise<EventResponse> {
         const { rows } = await pool.query<EventResponse>(
@@ -21,7 +28,7 @@ export class EventModel {
         userId: number,
         limit: number,
         offset: number,
-        date?: string, // опциональный фильтр на конкретную дату
+        date?: string,
     ): Promise<EventResponse[]> {
         const values: any[] = [userId]
         let dateFilter = ''
@@ -112,5 +119,26 @@ ORDER BY pd.day ASC, e.id ASC
 
     static async deleteEvent(id: number): Promise<void> {
         await pool.query(`DELETE FROM events WHERE id = $1`, [id])
+    }
+
+    static async getEventsNeedingReminder(): Promise<(EventWithEmail & { email: string })[]> {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        const in7Days = new Date()
+        in7Days.setDate(in7Days.getDate() + 7)
+        in7Days.setHours(23, 59, 59, 999)
+
+        const { rows } = await pool.query<EventWithEmail & { email: string }>(
+            `SELECT e.*, u.email
+             FROM events e
+             JOIN users u ON e.user_id = u.id
+             WHERE e.date >= $1
+               AND e.date <= $2
+             ORDER BY e.date`,
+            [today, in7Days],
+        )
+
+        return rows
     }
 }

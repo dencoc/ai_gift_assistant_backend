@@ -11,6 +11,7 @@ import { initTelegramBot } from './telegram/bot'
 import path from 'path'
 
 import './jobs/userScheduler'
+import './jobs/eventReminder'
 
 const app = express()
 const port = 3000
@@ -33,7 +34,7 @@ app.use('/api/avatar/url', express.static(path.join(__dirname, '../uploads/avata
 
 app.get('/server', (req, res) => res.send('Server is running!'))
 
-//initTelegramBot()
+initTelegramBot()
 app.use(errorHandler)
 
 app.listen(port, () => {
