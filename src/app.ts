@@ -9,6 +9,7 @@ import photoRoutes from './routes/photoRoutes'
 import eventRoutes from './routes/eventRoutes'
 import { initTelegramBot } from './telegram/bot'
 import path from 'path'
+import '@jest/globals'
 
 import './jobs/userScheduler'
 import './jobs/eventReminder'
