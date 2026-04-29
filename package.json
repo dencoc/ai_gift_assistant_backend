@@ -1,0 +1,53 @@
+{
+    "name": "ai-gift-assistant",
+    "version": "1.0.0",
+    "description": "Backend for Ai Gift Assistant",
+    "main": "dist/app.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/app.js",
+        "dev": "ts-node src/app.ts",
+        "dev:watch": "nodemon --exec ts-node src/app.ts",
+        "test": "jest --config src/tests/jest.config.js",
+        "test:watch": "jest --config src/tests/jest.config.js --watch"
+    },
+    "devDependencies": {
+        "@types/bcrypt": "^6.0.0",
+        "@types/cookie-parser": "^1.4.9",
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.3",
+        "@types/jest": "^30.0.0",
+        "@types/jsonwebtoken": "^9.0.10",
+        "@types/multer": "^2.0.0",
+        "@types/node": "^24.5.2",
+        "@types/node-telegram-bot-api": "^0.64.12",
+        "@types/nodemailer": "^7.0.2",
+        "@types/pg": "^8.15.5",
+        "@types/supertest": "^6.0.3",
+        "@types/uuid": "^10.0.0",
+        "jest": "^30.2.0",
+        "nodemon": "^3.1.10",
+        "supertest": "^7.1.4",
+        "ts-jest": "^29.4.6",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.2"
+    },
+    "dependencies": {
+        "@jest/globals": "^30.3.0",
+        "bcrypt": "^6.0.0",
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.5",
+        "dotenv": "^17.2.3",
+        "express": "^5.1.0",
+        "jsonwebtoken": "^9.0.2",
+        "multer": "^2.0.2",
+        "node-cron": "^4.2.1",
+        "node-fetch": "^3.3.2",
+        "node-telegram-bot-api": "^0.66.0",
+        "nodemailer": "^7.0.9",
+        "pg": "^8.16.3",
+        "redis": "^5.8.3",
+        "telegraf": "^4.16.3",
+        "zod": "^4.1.11"
+    }
+}
