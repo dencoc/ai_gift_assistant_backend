@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,11 +17,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'   # 🔥 ускорение
 
       - name: 📦 Install dependencies
         run: npm ci
 
-      - name: 🏗 Build project
+      - name: 🔍 Type check
+        run: npx tsc --noEmit
+
+      - name: 🏗 Build
         run: npm run build
 
       - name: 🧪 Run tests
